@@ -1,0 +1,83 @@
+
+A. Lamp currents (mA) by lamp model
+-----------------------------------
+lamp  model           18 V      28 V      32 V
+tail  resistive      21.9     34.0     38.9
+tail  linear         29.2     29.2     29.2
+tail  const_p        38.9     25.0     21.9
+stop  resistive     156.2    243.1    277.8
+stop  linear        208.3    208.3    208.3
+stop  const_p       277.8    178.6    156.2
+turn  resistive      93.8    145.8    166.7
+turn  linear        125.0    125.0    125.0
+turn  const_p       166.7    107.1     93.8
+tail: min 21.9 mA, max 38.9 mA over all models and voltages
+stop: min 156.2 mA, max 277.8 mA over all models and voltages
+turn: min 93.8 mA, max 166.7 mA over all models and voltages
+All six ON (tail+stop+hazard): 17.4 W = 0.725 A at 24 V
+
+B. Tail lamp vs ON-state open-load threshold (max)
+--------------------------------------------------
+BTT6030-2ERB (2 ch): threshold max 25 mA, tail min 21.9 mA -> margin -3.1 mA, ratio 0.87x
+   cases at/below threshold: resistive @ 18 V (21.9 mA), const_p @ 28 V (25.0 mA), const_p @ 32 V (21.9 mA)
+BTT6200-4ESA (4 ch): threshold max 15 mA, tail min 21.9 mA -> margin +6.9 mA, ratio 1.46x
+   cases at/below threshold: none
+LMP-01 limit 20 mA = 1.33x BTT6200 max threshold; reference tail min 21.9 mA meets it: True
+
+C. Current limit vs largest lamp current
+----------------------------------------
+BTT6030-2ERB (2 ch): I_lim min 40 A = 144x worst stop current
+BTT6200-4ESA (4 ch): I_lim min 9 A = 32x worst stop current
+
+D. Current sense, BTT6200, R_IS = 1.2 k
+---------------------------------------
+ADC LSB 0.806 mV
+0.5 A variant, kILIS -11 %: IIS 1.70 mA -> VIS 2.04 V (< 3.3 V); R_IS max for 3.0 V: 1.76 k
+  tail min   21.9 mA: VIS     53 /     80 /    159 mV (   99 LSB typ)
+  tail max   38.9 mA: VIS     94 /    141 /    283 mV (  176 LSB typ)
+  stop min  156.2 mA: VIS    379 /    568 /   1136 mV (  705 LSB typ)
+  stop max  277.8 mA: VIS    673 /   1010 /   2020 mV ( 1254 LSB typ)
+  turn min   93.8 mA: VIS    227 /    341 /    682 mV (  423 LSB typ)
+  turn max  166.7 mA: VIS    404 /    606 /   1212 mV (  752 LSB typ)
+Sense RC with 100 pF: tau 120 ns
+Fault saturation (IS ~ VS - 1 V = 27 V) through 10 k into clamp: 2.3 mA per device, 4.7 mA total into 3.3 V rail
+
+E. Losses per quad device (U1: STOP_L, TURN_R, TAIL_R)
+------------------------------------------------------
+Conduction (worst currents, 400 mOhm @150 C): 42.6 mW
+Bias I_GND x VS (9 mA x 32 V): 288 mW
+Total 331 mW -> dTj 13.2 K at 40 K/W (ASSUMPTION) -> Tj 98 C at 85 C ambient
+Both devices bias typ 336 mW @28 V
+
+F. OFF-state open-load pull-up (1.5 k) into a tail lamp
+-------------------------------------------------------
+VS 28 V: 12.1 mA (35 % of ON current)
+VS 32 V: 13.8 mA (35 % of ON current)
+Six permanent pull-ups at 28 V: 112 mA
+
+G. Logic supply budget (ASSUMPTION allocations)
+-----------------------------------------------
+3.3 V 43 mA, LDO loss 73 mW; 5 V 113 mA = 0.57 W
+Buck input 0.71 W: 25 mA @28 V, 39 mA @18 V; LM5164 1 A margin 8.8x
+
+H. Sleep budget (100 uA allocation, ASSUMPTION)
+-----------------------------------------------
+  2x quad switch standby (max, <=85 C)                 1.0 uA
+  CAN transceiver sleep on VSUP (allocation)          20.0 uA
+  Front-end controller Iq (allocation)                15.0 uA
+  Buck disabled via INH (allocation)                   5.0 uA
+  Brake input network, brake released (allocation)     2.0 uA
+  Dividers / leakage (allocation)                     10.0 uA
+  TOTAL                                               53.0 uA
+
+I. Passive brake path (no logic supply needed)
+----------------------------------------------
+Brake 18 V: zener current 0.59 mA, R_B loss 8 mW, IN-side level ~4.8 V
+Brake 32 V: zener current 1.22 mA, R_B loss 33 mW, IN-side level ~4.8 V
+MCU branch: 3.3 V - 0.3 V = 3.0 V at the IN network (check vs VIN(H) max)
+
+J. Load-dump headroom to 65 V parts
+-----------------------------------
+Test B, 58 V      : headroom   +7 V
+Test B, 65 V      : headroom   +0 V
+Test A min, 151 V : headroom  -86 V
