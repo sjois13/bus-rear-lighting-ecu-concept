@@ -1,6 +1,6 @@
 # 24 V Bus Rear-Lighting ECU: Concept Study
 
-**Author:** [Your name] · **Rev B**, October 2026 · Self-directed work sample
+**Author:** Sumukha Jois K M · **Rev B**, October 2026 · Self-directed work sample
 
 ## What this is
 
